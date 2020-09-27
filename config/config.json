@@ -5,7 +5,7 @@
     "userDataDir": "./userData"
   },
   "url": {
-    "pixiv": "https://sketch.pixiv.net/notifications"    
+    "pixiv": "https://sketch.pixiv.net/notifications"
   },
   "interval": 60000
 }

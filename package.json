@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "login": "node pixivLogin.js"
+    "login": "node pixivLogin.js",
+    "dev": "node getPixivFollowings.js"
   },
   "keywords": [],
   "author": "",
