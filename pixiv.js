@@ -4,6 +4,7 @@ const { notification, StreamingUser } = {
   notification: 'div.WallItem',
   StreamingUser: 'div.NotificationBody > span > a:nth-child(2)'
 }
+const fs = require('fs')
 const puppeteer = require('puppeteer-core');
 
 (async () => {
@@ -33,8 +34,21 @@ const puppeteer = require('puppeteer-core');
           href
         })
       }))
-      
+
       console.log(streamerIds)
+
+      // 取得想要錄製的使用者資料
+      const fetchUsersData = fs.readFileSync('./model/usersData.json', 'utf8', (err, user) => user.toString())
+      // 取得目前正在實況的使用者資料
+      const fetchIsRecording = fs.readFileSync('./model/isRecording.json', 'utf8', (err, user) => user.toString())
+
+      let [usersData, isRecording] = await Promise.all([fetchUsersData, fetchIsRecording])
+
+      usersData = JSON.parse(usersData)
+      isRecording = JSON.parse(isRecording)
+
+      console.log('usersData', usersData[0])
+      console.log('isRecording', isRecording)
     } else {
       console.log('No User is streaming.')
     }
