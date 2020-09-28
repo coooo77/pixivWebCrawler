@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "login": "node pixivLogin.js",
-    "fetch": "node getPixivFollowings.js"
+    "fetch": "node getPixivFollowings.js",
+    "dev": "node pixiv.js"
   },
   "keywords": [],
   "author": "",
