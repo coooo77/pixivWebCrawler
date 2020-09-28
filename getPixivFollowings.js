@@ -1,5 +1,6 @@
 const { setting, url } = require('./config/config.json')
 const { fetchUsersData } = require('./util/helper')
+const fs = require('fs')
 const avatar = {
   img: '#HeaderBody > div > div.HeaderButtonsRight > div:nth-child(3) > div > div.DropdownTrigger.HeaderButtonUserIcon > button > div > div.MediaBody.background.circled',
   profile: "#HeaderBody > div > div.HeaderButtonsRight > div:nth-child(3) > div > div.DropdownContent > a:nth-child(1) > button",
@@ -32,7 +33,13 @@ const puppeteer = require('puppeteer-core');
     const dataForDB = await fetchUsersData(page, numOfFollowings)
     console.timeEnd('Record user data')
 
-    console.log(dataForDB)
+    fs.writeFile(
+      './model/usersData.json',
+      JSON.stringify(dataForDB),
+      'utf8',
+      () => {
+        console.log(`${dataForDB} users recorded in json file, stored in dir model.`)
+      })
 
     await browser.close();
   } catch (error) {
