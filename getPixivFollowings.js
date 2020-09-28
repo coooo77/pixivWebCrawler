@@ -38,7 +38,7 @@ const puppeteer = require('puppeteer-core');
       JSON.stringify(dataForDB),
       'utf8',
       () => {
-        console.log(`${dataForDB} users recorded in json file, stored in dir model.`)
+        console.log(`${dataForDB.length} users recorded in json file, stored in dir model.`)
       })
 
     await browser.close();

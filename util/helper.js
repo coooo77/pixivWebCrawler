@@ -19,7 +19,7 @@ const helper = {
       })
     )
   },
-  async fetchUsersData(page, numOfFollowings){
+  async fetchUsersData(page, numOfFollowings) {
     const dataForDB = []
 
     const fetchTarget = {
@@ -53,9 +53,11 @@ const helper = {
       ])
 
       dataForDB.push({
+        id: i,
         name: result[0],
         pixivEngId: result[1],
         userId: result[2],
+        isRecording: false
       })
       await target.click()
       await page.waitForSelector(pixivEngId, { hidden: true })
