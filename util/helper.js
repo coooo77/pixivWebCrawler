@@ -84,8 +84,8 @@ const helper = {
     })
 
     const [
-      fetchName, 
-      fetchUserId, 
+      fetchName,
+      fetchUserId,
       fetchPixivEngId
     ] = await Promise.all([
       gethName,
@@ -175,7 +175,8 @@ const helper = {
     echo [CountDown] Loop for 120 times, try %count% times ...
     streamlink --pixiv-sessionid "${process.env.sessionid}" --pixiv-devicetoken "${process.env.devicetoken}" --pixiv-performer %name% %url% best -o D://JD\\@%name%_live_pixiv_%DATE%_%hour%%time:~3,2%%time:~6,2%.mp4
     if "%count%" == "120" exit
-    timeout /t 30
+    echo [CountDown] count down for 30 sec...
+    @ping 127.0.0.1 -n 30 -w 1000 > nul
     goto loop
     `
     } else {
@@ -190,7 +191,8 @@ const helper = {
     echo [CountDown] Loop for 120 times, try %count% times ... 
     streamlink --pixiv-sessionid "${process.env.sessionid}" --pixiv-devicetoken "${process.env.devicetoken}" --pixiv-purge-credentials https://sketch.pixiv.net/@%name% best -o D://JD\\@%name%_live_pixiv_%DATE%_%hour%%time:~3,2%%time:~6,2%.mp4
     if "%count%" == "120" exit
-    timeout /t 30
+    echo [CountDown] count down for 30 sec...
+    @ping 127.0.0.1 -n 30 -w 1000 > nul
     goto loop
     `
     }

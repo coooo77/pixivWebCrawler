@@ -1,13 +1,13 @@
 const { setting, url } = require('./config/config.json')
 const nextPageSelector = '#AppContent > div.Notifications > div.Wall > div > div.WallLoadNext > button'
 const StreamingUser = 'div.NotificationBody > span > a:nth-child(2)'
-const { fetchStreamingUser, fetchDBUsers, fetchDBIsRecording, upDateUser, getStreamInfo, recordStream, upDateIsRecording, wait } = require('./util/helper')
+const { fetchStreamingUser, fetchDBUsers, fetchDBIsRecording, upDateUser, getStreamInfo, recordStream, recordColStream, upDateIsRecording, wait } = require('./util/helper')
 
 const puppeteer = require('puppeteer-core');
 
-(async () => {
+module.exports = (async (browser) => {
   try {
-    const browser = await puppeteer.launch(setting);
+    // const browser = await puppeteer.launch(setting);
     const page = await browser.newPage();
     await page.goto(url.pixiv, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector(nextPageSelector)
@@ -33,10 +33,12 @@ const puppeteer = require('puppeteer-core');
         if (!isRecording.some(user => user.datasetUserId === streamer.datasetUserId)) {
           // 先去點選Id，存取dataset-user-id相對應的userId
           const fetchData = await fetchStreamingUser(page, streamer)
-          const [fetchPixivEngId] = fetchData
+          const fetchPixivEngId = fetchData[2]
 
           await upDateUser(usersData, fetchData)
           // 開始錄製
+          console.log('streamer.host', streamer.host)
+          console.log('fetchPixivEngId', fetchPixivEngId)
           if (streamer.host !== fetchPixivEngId) {
             console.log(`${streamer.userName} join collaboration streaming, start to record`)
             await recordColStream(fetchPixivEngId, streamer.href, __dirname)
@@ -63,4 +65,4 @@ const puppeteer = require('puppeteer-core');
   } catch (error) {
     console.error(error)
   }
-})()
+})
