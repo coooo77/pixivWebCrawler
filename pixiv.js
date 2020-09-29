@@ -21,8 +21,6 @@ const puppeteer = require('puppeteer-core');
       // 讀取所有實況者ID與實況網址   
       const streamersInfo = await getStreamInfo(page, StreamingUser)
 
-      // console.log('streamersInfo', streamersInfo)
-
       // 取得想要錄製的使用者資料usersData
       // 取得目前正在實況的使用者資料isRecording
       let [usersData, isRecording] = await Promise.all([fetchDBUsers(), fetchDBIsRecording()])
@@ -30,14 +28,12 @@ const puppeteer = require('puppeteer-core');
       usersData = JSON.parse(usersData)
       isRecording = JSON.parse(isRecording)
 
-      // console.log('isRecording', isRecording)
-
       // 比較isRecoding清單，如果實況者不在清單內就開始錄影
       for (streamer of streamersInfo) {
         if (!isRecording.some(user => user.datasetUserId === streamer.datasetUserId)) {
           // 先去點選Id，存取dataset-user-id相對應的userId
           const fetchData = await fetchStreamingUser(page, streamer)
-          const [fetchName, fetchUserId, fetchPixivEngId] = fetchData
+          const [fetchPixivEngId] = fetchData
 
           await upDateUser(usersData, fetchData)
           // 開始錄製

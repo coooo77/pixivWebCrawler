@@ -83,7 +83,11 @@ const helper = {
       return str.substr(0, cut)
     })
 
-    const [fetchName, fetchUserId, fetchPixivEngId] = await Promise.all([
+    const [
+      fetchName, 
+      fetchUserId, 
+      fetchPixivEngId
+    ] = await Promise.all([
       gethName,
       getUserId,
       getPixivEngId
