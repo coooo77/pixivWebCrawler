@@ -44,7 +44,7 @@ const puppeteer = require('puppeteer-core');
           // 開始錄製
           if (streamer.host !== fetchPixivEngId) {
             console.log(`${streamer.userName} join collaboration streaming, start to record`)
-            // await recordColStream(fetchPixivEngId, streamer.href, __dirname)
+            await recordColStream(fetchPixivEngId, streamer.href, __dirname)
           } else {
             console.log(`${streamer.userName} is streaming, start to record`)
             await recordStream(fetchPixivEngId, __dirname)

@@ -147,21 +147,32 @@ const helper = {
         })
       }
 
-      const commands = cp.exec('start ' + dirName + `\\recorder\\@${userName}.bat`, (error, stdout, stderr) => {
-        if (error) {
-          console.log(`Name: ${error.name}\nMessage: ${error.message}\nStack: ${error.stack}`)
-        }
-      })
-      process.on('exit', function () {
-        console.log(`${userName}'s record process killed`)
-        commands.kill()
-      })
+      helper.execFile(`@${userName}`, dirName)
     })
   },
-  recorderMaker(userName, isCol = false) {
+  async recordColStream(userName, hostUrl, dirName) {
+    const fileName = `${new Date()}@${userName}`
+    fs.writeFile(`./recorder/${fileName}.bat`, helper.recorderMaker(userName, true, hostUrl), (error) => {
+      console.log(error);
+    })
+    helper.execFile(`${fileName}`, dirName)
+  },
+  recorderMaker(userName, isCol = false, hostUrl) {
     if (isCol) {
       return `
-      
+    @echo off
+    set name=${userName}
+    set url=${hostUrl}
+    set count=0
+    :loop
+    set hour=%time:~0,2%
+    if "%hour:~0,1%" == " " set hour=0%hour:~1,1%
+    set /a count+=1
+    echo [CountDown] Loop for 120 times, try %count% times ...
+    streamlink --pixiv-sessionid "${process.env.sessionid}" --pixiv-devicetoken "${process.env.devicetoken}" --pixiv-performer %name% %url% best -o D://JD\\@%name%_live_pixiv_%DATE%_%hour%%time:~3,2%%time:~6,2%.mp4
+    if "%count%" == "120" exit
+    timeout /t 30
+    goto loop
     `
     } else {
       return `
@@ -173,12 +184,23 @@ const helper = {
     if "%hour:~0,1%" == " " set hour=0%hour:~1,1%
     set /a count+=1
     echo [CountDown] Loop for 120 times, try %count% times ... 
-    streamlink --pixiv-sessionid "${process.env.sessionid}" --pixiv-devicetoken "${process.env.devicetoken}" --pixiv-purge-credentials https://sketch.pixiv.net/@%name% best -o D:\JD\@%name%_live_pixiv_%DATE%_%hour%%time:~3,2%%time:~6,2%.mp4
+    streamlink --pixiv-sessionid "${process.env.sessionid}" --pixiv-devicetoken "${process.env.devicetoken}" --pixiv-purge-credentials https://sketch.pixiv.net/@%name% best -o D://JD\\@%name%_live_pixiv_%DATE%_%hour%%time:~3,2%%time:~6,2%.mp4
     if "%count%" == "120" exit
     timeout /t 30
     goto loop
     `
     }
+  },
+  execFile(fileName, dirName) {
+    const commands = cp.exec('start ' + dirName + `\\recorder\\${fileName}.bat`, (error, stdout, stderr) => {
+      if (error) {
+        console.log(`Name: ${error.name}\nMessage: ${error.message}\nStack: ${error.stack}`)
+      }
+    })
+    process.on('exit', function () {
+      console.log(`${fileName}'s record process killed`)
+      commands.kill()
+    })
   }
 }
 
