@@ -4,6 +4,8 @@ const fetchTarget = {
   pixivEngId: '#root > div.Sidebar.visible > div.SidebarMain > div.SidebarMainBody > div.sidebarInside > div > div.UserHeaderBody > div > div.follow-stats > div > a:nth-child(1)'
 }
 const fs = require('fs')
+const cp = require('child_process')
+require('dotenv').config()
 
 const helper = {
   wait(ms) {
@@ -133,6 +135,50 @@ const helper = {
       })
     }))
     return streamersInfo
+  },
+  async recordStream(userName, dirName) {
+    fs.access(`${dirName}/recorder/@${userName}.bat`, fs.constants.F_OK, (err) => {
+      console.log(`file ${userName}.bat ${err ? 'does not exist' : 'exists'}`)
+
+      if (err) {
+        console.log(`create @${userName}.bat`)
+        fs.writeFile(`./recorder/@${userName}.bat`, helper.recorderMaker(userName), (error) => {
+          console.log(error);
+        })
+      }
+
+      const commands = cp.exec('start ' + dirName + `\\recorder\\@${userName}.bat`, (error, stdout, stderr) => {
+        if (error) {
+          console.log(`Name: ${error.name}\nMessage: ${error.message}\nStack: ${error.stack}`)
+        }
+      })
+      process.on('exit', function () {
+        console.log(`${userName}'s record process killed`)
+        commands.kill()
+      })
+    })
+  },
+  recorderMaker(userName, isCol = false) {
+    if (isCol) {
+      return `
+      
+    `
+    } else {
+      return `
+    @echo off
+    set name=${userName}
+    set count=0
+    :loop
+    set hour=%time:~0,2%
+    if "%hour:~0,1%" == " " set hour=0%hour:~1,1%
+    set /a count+=1
+    echo [CountDown] Loop for 120 times, try %count% times ... 
+    streamlink --pixiv-sessionid "${process.env.sessionid}" --pixiv-devicetoken "${process.env.devicetoken}" --pixiv-purge-credentials https://sketch.pixiv.net/@%name% best -o D:\JD\@%name%_live_pixiv_%DATE%_%hour%%time:~3,2%%time:~6,2%.mp4
+    if "%count%" == "120" exit
+    timeout /t 30
+    goto loop
+    `
+    }
   }
 }
 
