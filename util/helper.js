@@ -201,6 +201,15 @@ const helper = {
       console.log(`${fileName}'s record process killed`)
       commands.kill()
     })
+  },
+  upDateIsRecording(data) {
+    fs.writeFile(
+      './model/isRecording.json',
+      JSON.stringify(data),
+      'utf8',
+      (error) => {
+        console.log(error);
+      })
   }
 }
 

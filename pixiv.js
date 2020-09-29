@@ -1,8 +1,8 @@
 const { setting, url } = require('./config/config.json')
 const nextPageSelector = '#AppContent > div.Notifications > div.Wall > div > div.WallLoadNext > button'
 const StreamingUser = 'div.NotificationBody > span > a:nth-child(2)'
-const { fetchStreamingUser, fetchDBUsers, fetchDBIsRecording, upDateUser, getStreamInfo, recordStream } = require('./util/helper')
-const fs = require('fs')
+const { fetchStreamingUser, fetchDBUsers, fetchDBIsRecording, upDateUser, getStreamInfo, recordStream, upDateIsRecording, wait } = require('./util/helper')
+
 const puppeteer = require('puppeteer-core');
 
 (async () => {
@@ -38,8 +38,7 @@ const puppeteer = require('puppeteer-core');
           // 先去點選Id，存取dataset-user-id相對應的userId
           const fetchData = await fetchStreamingUser(page, streamer)
           const [fetchName, fetchUserId, fetchPixivEngId] = fetchData
-          console.log('UserName', fetchName, 'UserId', fetchUserId, 'PixivEngId', fetchPixivEngId)
-          console.log('streamer', streamer)
+
           await upDateUser(usersData, fetchData)
           // 開始錄製
           if (streamer.host !== fetchPixivEngId) {
@@ -56,13 +55,15 @@ const puppeteer = require('puppeteer-core');
       }
       // 更新isRecording
       isRecording = streamersInfo
-      // console.log('\nUpdate isRecording')
-      // console.log('TODO：isRecording 用fs貯存', '\n', isRecording)
+      console.log('\nUpdate isRecording')
+      upDateIsRecording(isRecording)
     } else {
-      // console.log('No User is streaming.')
+      console.log('No User is streaming.')
       isRecording = []
-      // console.log('TODO：isRecording 用fs貯存', '\n', isRecording)
+      upDateIsRecording(isRecording)
     }
+    await wait(1000)
+    await page.close()
   } catch (error) {
     console.error(error)
   }
