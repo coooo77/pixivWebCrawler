@@ -55,8 +55,8 @@ const helper = {
       dataForDB.push({
         id: i,
         name: result[0],
-        pixivEngId: result[1],
-        userId: result[2],
+        userId: result[1],
+        pixivEngId: result[2],
         isRecording: false
       })
       await target.click()
