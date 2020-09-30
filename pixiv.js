@@ -37,8 +37,6 @@ module.exports = (async (browser) => {
 
           await upDateUser(usersData, fetchData)
           // 開始錄製
-          console.log('streamer.host', streamer.host)
-          console.log('fetchPixivEngId', fetchPixivEngId)
           if (streamer.host !== fetchPixivEngId) {
             console.log(`${streamer.userName} join collaboration streaming, start to record`)
             await recordColStream(fetchPixivEngId, streamer.href, __dirname)

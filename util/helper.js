@@ -155,7 +155,7 @@ const helper = {
     })
   },
   async recordColStream(userName, hostUrl, dirName) {
-    const fileName = `${new Date()}@${userName}`
+    const fileName = `${new Date().getTime()}@${userName}`
     fs.writeFile(`./recorder/${fileName}.bat`, helper.recorderMaker(userName, true, hostUrl), (error) => {
       console.log(error);
     })
