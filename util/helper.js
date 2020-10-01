@@ -173,11 +173,11 @@ const helper = {
     fs.writeFile(`./recorder/${fileName}.bat`, helper.recorderMaker(userName, true, hostUrl), (error) => {
       console.log(error);
     })
-    helper.execFile(`${fileName}`, dirName)
+    await setTimeout(function () { helper.execFile(`${fileName}`, dirName) }, 30000)
   },
   async startRecord(streamer, fetchPixivEngId, dirname) {
     if (streamer.host !== fetchPixivEngId) {
-      console.log(`${streamer.userName} join collaboration streaming, start to record`)
+      console.log(`${streamer.userName} join collaboration streaming, wait 30s and record.`)
       await helper.recordColStream(fetchPixivEngId, streamer.href, dirname)
     } else {
       console.log(`${streamer.userName} is streaming, start to record`)
