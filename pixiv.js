@@ -1,13 +1,13 @@
-const { setting, url } = require('./config/config.json')
-const nextPageSelector = '#AppContent > div.Notifications > div.Wall > div > div.WallLoadNext > button'
-const StreamingUser = 'div.NotificationBody > span > a:nth-child(2)'
-const { fetchStreamingUser, fetchDBUsers, fetchDBIsRecording, upDateUser, getStreamInfo, recordStream, recordColStream, upDateIsRecording, wait } = require('./util/helper')
-
-const puppeteer = require('puppeteer-core');
+const { url, userFilter, addNewUser } = require('./config/config.js')
+const { nextPageSelector, StreamingUser } = {
+  nextPageSelector: '#AppContent > div.Notifications > div.Wall > div > div.WallLoadNext > button',
+  StreamingUser: 'div.NotificationBody > span > a:nth-child(2)'
+}
+const { fetchStreamingUser, upDateUser, getStreamInfo, upDateIsRecording, wait, startRecord } = require('./util/helper')
+const fs = require('fs')
 
 module.exports = (async (browser) => {
   try {
-    // const browser = await puppeteer.launch(setting);
     const page = await browser.newPage();
     await page.goto(url.pixiv, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector(nextPageSelector)
@@ -21,11 +21,8 @@ module.exports = (async (browser) => {
       // 讀取所有實況者ID與實況網址   
       const streamersInfo = await getStreamInfo(page, StreamingUser)
 
-      // 取得想要錄製的使用者資料usersData
       // 取得目前正在實況的使用者資料isRecording
-      let [usersData, isRecording] = await Promise.all([fetchDBUsers(), fetchDBIsRecording()])
-
-      usersData = JSON.parse(usersData)
+      let isRecording = await fs.readFileSync('./model/isStreaming.json', 'utf8', (err, user) => user.toString())
       isRecording = JSON.parse(isRecording)
 
       // 比較isRecoding清單，如果實況者不在清單內就開始錄影
@@ -33,16 +30,24 @@ module.exports = (async (browser) => {
         if (!isRecording.some(user => user.datasetUserId === streamer.datasetUserId)) {
           // 先去點選Id，存取dataset-user-id相對應的userId
           const fetchData = await fetchStreamingUser(page, streamer)
-          const fetchPixivEngId = fetchData[2]
-
-          await upDateUser(usersData, fetchData)
+          const [fetchName, fetchUserId, fetchPixivEngId] = fetchData
+          // 更新使用者資料後開始錄製
+          // 需要要過濾使用者，取得想要錄製的使用者資料usersData
+          let usersData = await fs.readFileSync('./model/usersData.json', 'utf8', (err, user) => user.toString())
+          usersData = JSON.parse(usersData)
+          const [user] = usersData.filter(user => user.userId === fetchUserId)
+          await upDateUser(usersData, user, fetchData, addNewUser, userFilter)
           // 開始錄製
-          if (streamer.host !== fetchPixivEngId) {
-            console.log(`${streamer.userName} join collaboration streaming, start to record`)
-            await recordColStream(fetchPixivEngId, streamer.href, __dirname)
+          // 檢查是否有設定過濾使用者
+          if (userFilter) {
+            if (user) {
+              await startRecord(streamer, fetchPixivEngId, __dirname)
+            } else {
+              console.log(`${fetchData[0]} isn't target, abort recording process.`)
+            }
           } else {
-            console.log(`${streamer.userName} is streaming, start to record`)
-            await recordStream(fetchPixivEngId, __dirname)
+            // 沒有要過濾使用者，直接檢查Notification上的使用者
+            await startRecord(streamer, fetchPixivEngId, __dirname)
           }
 
         } else {

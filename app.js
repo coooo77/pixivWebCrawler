@@ -1,4 +1,4 @@
-const { setting, interval } = require('./config/config.json')
+const { setting, interval } = require('./config/config.js')
 const puppeteer = require('puppeteer-core');
 (async () => {
   console.log('開始監控Pixiv實況')

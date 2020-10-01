@@ -97,32 +97,46 @@ const helper = {
 
     return ([fetchName, fetchUserId, fetchPixivEngId])
   },
-  fetchDBUsers() {
-    return fs.readFileSync('./model/usersData.json', 'utf8', (err, user) => user.toString())
-  },
-  fetchDBIsRecording() {
-    return fs.readFileSync('./model/isRecording.json', 'utf8', (err, user) => user.toString())
-  },
-  async upDateUser(usersData, fetchData) {
+  async upDateUser(usersData, user, fetchData, addNewUser, userFilter) {
+    // 檢查usersData是否有想要錄製的對象
     const [fetchName, fetchUserId, fetchPixivEngId] = fetchData
-    const [user] = usersData.filter(user => user.userId === fetchUserId)
+
     // 如果名稱或英文名稱有變動，對照資料庫，更新
-    if (user.name !== fetchName || user.pixivEngId !== fetchPixivEngId) {
-      console.log('User Data changed, start to Update.')
+    if (user && (user.name !== fetchName || user.pixivEngId !== fetchPixivEngId)) {
+      console.log(`User ${user.name} Data changed, start to Update.`)
       usersData = usersData.map(user => ({
         ...user,
         name: user.userId === fetchUserId ? fetchName : user.name,
         pixivEngId: user.userId === fetchUserId ? fetchPixivEngId : user.name
       }))
-      // 將更新結果存檔，更新使用者名稱跟英文名稱
-      await fs.writeFileSync(
-        './model/usersData.json',
-        JSON.stringify(usersData),
-        'utf8',
-        () => {
-          console.log(`Users data updated.`)
-        })
+      await helper.saveUserData(usersData)
+    } else if (!user && addNewUser && !userFilter) {
+      console.log(`No User can be found, start update user ${fetchName}.`)
+      usersData.push({
+        id: usersData.length,
+        name: fetchName,
+        userId: fetchUserId,
+        pixivEngId: fetchPixivEngId,
+        isRecording: false
+      })
+      // 更新Id
+      // usersData = usersData.map((user, index) => ({
+      //   ...user,
+      //   id: index
+      // }))
+      await helper.saveUserData(usersData)
+    } else if (!user && addNewUser && userFilter) {
+      console.log('[WARNING] addNewUser function can not work with userFilter function.\nTurn off userFilter function if you need to add user to DataBase.')
     }
+  },
+  async saveUserData(usersData) {
+    await fs.writeFileSync(
+      './model/usersData.json',
+      JSON.stringify(usersData),
+      'utf8',
+      () => {
+        console.log(`Users data updated.`)
+      })
   },
   async getStreamInfo(page, StreamingUser) {
     const streamersInfo = await page.$$eval(StreamingUser, nodes => nodes.map(node => {
@@ -160,6 +174,15 @@ const helper = {
       console.log(error);
     })
     helper.execFile(`${fileName}`, dirName)
+  },
+  async startRecord(streamer, fetchPixivEngId, dirname) {
+    if (streamer.host !== fetchPixivEngId) {
+      console.log(`${streamer.userName} join collaboration streaming, start to record`)
+      await helper.recordColStream(fetchPixivEngId, streamer.href, dirname)
+    } else {
+      console.log(`${streamer.userName} is streaming, start to record`)
+      await helper.recordStream(fetchPixivEngId, dirname)
+    }
   },
   recorderMaker(userName, isCol = false, hostUrl) {
     if (isCol) {
@@ -210,7 +233,7 @@ const helper = {
   },
   upDateIsRecording(data) {
     fs.writeFile(
-      './model/isRecording.json',
+      './model/isStreaming.json',
       JSON.stringify(data),
       'utf8',
       (error) => {

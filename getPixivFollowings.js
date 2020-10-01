@@ -1,4 +1,4 @@
-const { setting, url } = require('./config/config.json')
+const { setting, url } = require('./config/config.js')
 const { fetchUsersData } = require('./util/helper')
 const fs = require('fs')
 const avatar = {

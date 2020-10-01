@@ -1,4 +1,4 @@
-const { setting, url } = require('./config/config.json')
+const { setting, url } = require('./config/config.js')
 const puppeteer = require('puppeteer-core');
 
 (async () => {
