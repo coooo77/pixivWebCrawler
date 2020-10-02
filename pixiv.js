@@ -7,13 +7,12 @@ const { fetchStreamingUser, upDateUser, getStreamInfo, upDateIsRecording, wait, 
 const fs = require('fs')
 
 module.exports = (async (browser) => {
+  const page = await browser.newPage();
   try {
-    const page = await browser.newPage();
     await page.goto(url.pixiv, { waitUntil: 'domcontentloaded' });
     await page.waitForSelector(nextPageSelector)
     const nextPageBtn = await page.$(nextPageSelector)
-    if (nextPageBtn) nextPageBtn.click()
-
+    if (nextPageBtn) nextPageBtn.click()   
     // 存取正在實況者數量
     const numOfStreamingUser = await page.$$eval(StreamingUser, node => node.length)
 
@@ -64,8 +63,9 @@ module.exports = (async (browser) => {
       upDateIsRecording(isRecording)
     }
     await wait(1000)
-    await page.close()
   } catch (error) {
-    console.error(error)
+    console.log(error.name + ': ' + error.message)
+  } finally {
+    await page.close()
   }
 })
